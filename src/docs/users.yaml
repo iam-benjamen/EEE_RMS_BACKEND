@@ -1,0 +1,185 @@
+openapi: 3.0.0
+info:
+  title: EEE RMS API
+  version: 1.0.0
+  description: API endpoints EEE Department Result Management System
+
+paths:
+  /api/users:
+    get:
+      summary: Retrieve all users
+      description: Get a list of all users in the system
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+    
+    post:
+      summary: Create a new user
+      description: Add a new user to the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /api/users/{userId}:
+    get:
+      summary: Get a user by ID
+      description: Retrieve details of a specific user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+    
+    put:
+      summary: Update a user
+      description: Modify details of an existing user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+    
+    delete:
+      summary: Delete a user
+      description: Remove a user from the system
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The user ID
+        title:
+          type: string
+          description: The user's title (e.g., Mr., Mrs., Dr.)
+        firstName:
+          type: string
+          description: The user's first name
+        lastName:
+          type: string
+          description: The user's last name
+        email:
+          type: string
+          format: email
+          description: The user's email address
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [departmental_lecturer, level_coordinator, super_admin]
+          description: The user's roles in the system
+    
+    NewUser:
+      type: object
+      required:
+        - title
+        - firstName
+        - lastName
+        - email
+        - password
+        - roles
+      properties:
+        title:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [departmental_lecturer, level_coordinator, super_admin]
+    
+    UpdateUser:
+      type: object
+      properties:
+        title:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [departmental_lecturer, level_coordinator, super_admin]

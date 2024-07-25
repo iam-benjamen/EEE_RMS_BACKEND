@@ -1,0 +1,16 @@
+- Set up API Documentation with Swagger/Postman Docs (IN PROGRESS)
+- Set up user Authentication
+- Take note of security concerns(Helmet) (DONE)
+- User Input & API response validation  (DONE)
+- Authorization & role based permission (DONE)
+- Build more modules & db schemas
+
+
+-Authentication flow: 
+    Super Admin(HOD) creates user and assigns password,which is then encrypted before saved to the database
+    The login details are givenn to the intended user and login happens with email and password
+
+- add password_confirm, phone_number field
+- implement log out feature
+- jwt token Authentication (DONE)
+- refactor user controller file (DONE)
