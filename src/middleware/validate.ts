@@ -12,7 +12,7 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
       .json(
         formatResponse(
           false,
-          "User input error: Please ensure all form fields are filled correctly",
+          "Input error: Please ensure all form fields are filled correctly",
           { errors: errorMessages }
         )
       );

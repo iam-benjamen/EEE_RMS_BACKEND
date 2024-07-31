@@ -9,9 +9,11 @@ import { getUserByIdQuery } from "../models/userModel";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || "some-secret-key";
+const APP_KEY =
+  process.env.APP_KEY || "120138ed-86b8-7ey11-nw9z2L-6j6V4bZQ4594";
 
 export function generateToken(userId: number): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "3h" });
 }
 
 export function verifyToken(token: string): any {
@@ -23,18 +25,25 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  const appKey = req.header("X-APP-KEY");
+  if (!appKey || appKey !== APP_KEY) {
+    return res
+      .status(403)
+      .json(formatResponse(false, "Invalid application key", null));
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res
       .status(401)
-      .json(formatResponse(false, "No Auth Token Provided"));
+      .json(formatResponse(false, "No Auth Token Provided", null));
   }
 
   const [bearer, token] = authHeader.split(" ");
   if (bearer !== "Bearer" || !token) {
     return res
       .status(401)
-      .json(formatResponse(false, "Invalid Auth Token Provided"));
+      .json(formatResponse(false, "Invalid Auth Token Provided", null));
   }
 
   try {

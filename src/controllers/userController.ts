@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { formatResponse } from "../utils/responseFormatter";
-import { pool } from "../db";
 import {
   NotFoundError,
   BadRequestError,
@@ -8,7 +7,7 @@ import {
   ConflictError,
   ForbiddenError,
 } from "../utils/error";
-import { isEmpty } from "../utils/helpers";
+import { findObjectsByProperty, isEmpty } from "../utils/helpers";
 import {
   createUserQuery,
   deleteUserQuery,
@@ -16,14 +15,18 @@ import {
   getUserByIdQuery,
   updateUserQuery,
 } from "../models/userModel";
+import { Role } from "../types/userInterface";
 
 /**
- * Role based Permission
+ * ROLE BASED PERMISSION
  * @param role:string
  */
 export const isRestrictedTo = (role: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user.roles.includes(role)) {
+    const userRoleArray: Role[] = req.user.roles;
+    const requiredRole = findObjectsByProperty(userRoleArray, "name", role);
+
+    if (requiredRole.length === 0) {
       throw new ForbiddenError(
         "You do not have permission to perform this action"
       );
@@ -47,7 +50,7 @@ export const getAllUsers = async (
     const result = await getAllUsersQuery();
     res.json(formatResponse(true, "Users retrieved successfully", result));
   } catch (error) {
-    next(new InternalServerError("Error retrieving users"));
+    next(error);
   }
 };
 
@@ -95,15 +98,29 @@ export const createUser = async (
   next: NextFunction
 ) => {
   try {
-    const { title, first_name, last_name, email, password, roles, ...foreign } =
-      req.body;
+    const {
+      title,
+      first_name,
+      last_name,
+      email,
+      phone_number,
+      password,
+      ...foreign
+    } = req.body;
 
     //prevent foreign fields
     if (!isEmpty(foreign)) {
       throw new BadRequestError("foreign field detected");
     }
 
-    if (!title || !first_name || !last_name || !email || !password || !roles) {
+    if (
+      !title ||
+      !first_name ||
+      !last_name ||
+      !email ||
+      !password ||
+      !phone_number
+    ) {
       throw new BadRequestError("Missing required fields");
     }
 
@@ -116,7 +133,7 @@ export const createUser = async (
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      roles: user.roles,
+      phone_number: user.phone_number,
     };
 
     res
@@ -144,14 +161,20 @@ export const updateUser = async (
 ) => {
   try {
     const userId = parseInt(req.params.id);
-    const { title, first_name, last_name, email, roles, ...foreign } = req.body;
+
+    if (!userId) {
+      throw new BadRequestError("user Id not provided");
+    }
+
+    const { title, first_name, last_name, email, phone_number, ...foreign } =
+      req.body;
 
     //prevent foreign fields
     if (!isEmpty(foreign)) {
       throw new BadRequestError("foreign field detected");
     }
 
-    if (!title || !first_name || !last_name || !email || !roles) {
+    if (!title || !first_name || !last_name || !email || !phone_number) {
       throw new BadRequestError("Missing required fields");
     }
 

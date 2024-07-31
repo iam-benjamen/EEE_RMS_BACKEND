@@ -6,11 +6,21 @@
 - Build more modules & db schemas
 
 
--Authentication flow: 
+- Authentication flow: 
     Super Admin(HOD) creates user and assigns password,which is then encrypted before saved to the database
     The login details are givenn to the intended user and login happens with email and password
 
 - add password_confirm, phone_number field
-- implement log out feature
+- implement log out feature (CLIENT SIDE)
 - jwt token Authentication (DONE)
 - refactor user controller file (DONE)
+
+
+July 28TH
+
+- IMPLEMENT ROLE MANAGEMENT MODULE (MANY TO MANY RELATIONSHIP WITH USERS)
+- IMPLEMENT CRUD & ENDPOINT TO ASSIGN AND REMOVE ROLE TO USERS
+- REWRITE ISRESTRICTED CONTROLLER TO CHECK USER_ROLES TABLE, NOT USER PAYLOAD
+
+NOTE THAT STUDENT MANAGEMENT WILL BE DIFFERENT FOR SUPER_ADMIN AND LEVEL_COORDINATOR
+FOR EXAMPLE, SUPER ADMIN CAN VIEW ALL STUDENTS, WHILE LEVEL_COORDINATOR CAN ONLY VIEW STUDENTS IN HIS LEVEL

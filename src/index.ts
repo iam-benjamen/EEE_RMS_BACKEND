@@ -2,6 +2,7 @@ import { setupSwagger } from "./middleware/swaggerMiddleware";
 import { port } from "./utils/config";
 import { pool } from "./db";
 import app from "./app";
+import { errorHandler } from "./middleware/errorHandler";
 
 /**
  * DATABASE CONNECTION
@@ -15,6 +16,10 @@ pool
  * SWAGGER DOCUMENTATION
  */
 setupSwagger(app);
+
+
+//Global Error Handler
+app.use(errorHandler);
 
 /**
  * SERVER ACTIVATION

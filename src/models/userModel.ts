@@ -8,7 +8,45 @@ import bcrypt from "bcrypt";
  */
 export const getAllUsersQuery = async (): Promise<User[]> => {
   const result = await pool.query(
-    "SELECT id, title, first_name, last_name, email, roles FROM users"
+    `
+    SELECT 
+      u.id, 
+      u.title,
+      u.first_name,
+      u.last_name,
+      u.phone_number,
+      u.email,
+      COALESCE(json_agg(
+        jsonb_build_object(
+          'id', r.id,
+          'name', r.name
+        ) 
+      ) FILTER (WHERE r.id IS NOT NULL), '[]') AS roles,
+      COALESCE(json_agg(
+        jsonb_build_object(
+          'id', c.id,
+          'course_code', c.course_code,
+          'course_title', c.course_title,
+          'course_unit', c.course_unit,
+          'level', c.level,
+          'semester', c.semester,
+          'course_type', c.course_type,
+          'course_department', c.course_department
+        ) 
+      ) FILTER (WHERE c.id IS NOT NULL), '[]') AS courses
+    FROM 
+      users u
+    LEFT JOIN 
+      user_roles ur ON u.id = ur.user_id
+    LEFT JOIN 
+      roles r ON ur.role_id = r.id
+    LEFT JOIN 
+      course_lecturers cl ON u.id = cl.user_id
+    LEFT JOIN 
+      courses c ON cl.course_id = c.id
+    GROUP BY 
+      u.id, u.title, u.first_name, u.last_name, u.phone_number, u.email
+  `
   );
   return result.rows;
 };
@@ -21,7 +59,47 @@ export const getUserByIdQuery = async (
   id: number
 ): Promise<QueryResult<any>> => {
   const result = await pool.query(
-    "SELECT id, title, first_name, last_name, email, roles FROM users WHERE id = $1",
+    `
+    SELECT 
+      u.id, 
+      u.title,
+      u.first_name,
+      u.last_name,
+      u.phone_number,
+      u.email,
+      COALESCE(json_agg(
+        DISTINCT jsonb_build_object(
+          'id', r.id,
+          'name', r.name
+        ) 
+      ) FILTER (WHERE r.id IS NOT NULL), '[]') AS roles,
+      COALESCE(json_agg(
+        DISTINCT jsonb_build_object(
+          'id', c.id,
+          'course_code', c.course_code,
+          'course_title', c.course_title,
+          'course_unit', c.course_unit,
+          'level', c.level,
+          'semester', c.semester,
+          'course_type', c.course_type,
+          'course_department', c.course_department
+        ) 
+      ) FILTER (WHERE c.id IS NOT NULL), '[]') AS courses
+    FROM 
+      users u
+    LEFT JOIN 
+      user_roles ur ON u.id = ur.user_id
+    LEFT JOIN 
+      roles r ON ur.role_id = r.id
+    LEFT JOIN 
+      course_lecturers cl ON u.id = cl.user_id
+    LEFT JOIN 
+      courses c ON cl.course_id = c.id
+    WHERE 
+      u.id = $1
+    GROUP BY 
+      u.id, u.title, u.first_name, u.last_name, u.phone_number, u.email
+  `,
     [id]
   );
   return result;
@@ -34,15 +112,16 @@ export const getUserByIdQuery = async (
 export const createUserQuery = async (
   userInput: UserInput
 ): Promise<QueryResult<any>> => {
-  const { title, first_name, last_name, email, password, roles } = userInput;
+  const { title, first_name, last_name, email, phone_number, password } =
+    userInput;
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   const result = await pool.query(
-    `INSERT INTO users (title, first_name, last_name, email, password, roles) 
+    `INSERT INTO users (title, first_name, last_name, email, phone_number, password) 
      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [title, first_name, last_name, email, hashedPassword, roles]
+    [title, first_name, last_name, email, phone_number, hashedPassword]
   );
   return result;
 };
@@ -56,11 +135,11 @@ export const updateUserQuery = async (
   id: number,
   userInput: UserInput
 ): Promise<QueryResult<any>> => {
-  const { title, first_name, last_name, email, roles } = userInput;
+  const { title, first_name, last_name, email, phone_number } = userInput;
 
   const result = await pool.query(
-    "UPDATE users SET title = $1, first_name = $2, last_name = $3, email = $4, roles = $5 WHERE id = $6 RETURNING id, title, first_name, last_name, email, roles",
-    [title, first_name, last_name, email, roles, id]
+    "UPDATE users SET title = $1, first_name = $2, last_name = $3, email = $4, phone_number = $6 WHERE id = $5 RETURNING id, title, first_name, last_name, email, phone_number",
+    [title, first_name, last_name, email, id, phone_number]
   );
 
   return result;

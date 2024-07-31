@@ -5,7 +5,6 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../utils/error";
-import { pool } from "../db";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt";
 import { getUserByEmailQuery } from "../models/authModel";
@@ -36,12 +35,14 @@ export const login = async (
     }
 
     const token = generateToken(user.id);
+
     res.json(
       formatResponse(true, "Login successful", {
         token,
         user: {
           id: user.id,
           email: user.email,
+          phone_number: user.phone_number,
           first_name: user.first_name,
           last_name: user.last_name,
           roles: user.roles,

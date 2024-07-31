@@ -10,7 +10,6 @@ const userRouter: Router = express.Router();
  * @swagger
  * /api/users
  */
-
 //GET USER BY ID(/users/id)
 userRouter.get(
   "/:id",
