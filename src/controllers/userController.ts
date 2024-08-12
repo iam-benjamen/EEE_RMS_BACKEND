@@ -3,7 +3,6 @@ import { formatResponse } from "../utils/responseFormatter";
 import {
   NotFoundError,
   BadRequestError,
-  InternalServerError,
   ConflictError,
   ForbiddenError,
 } from "../utils/error";
@@ -26,7 +25,7 @@ export const isRestrictedTo = (role: string) => {
     const userRoleArray: Role[] = req.user.roles;
     const requiredRole = findObjectsByProperty(userRoleArray, "name", role);
 
-    if (requiredRole.length === 0) {
+    if (!requiredRole) {
       throw new ForbiddenError(
         "You do not have permission to perform this action"
       );

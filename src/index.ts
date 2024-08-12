@@ -17,10 +17,6 @@ pool
  */
 setupSwagger(app);
 
-
-//Global Error Handler
-app.use(errorHandler);
-
 /**
  * SERVER ACTIVATION
  */

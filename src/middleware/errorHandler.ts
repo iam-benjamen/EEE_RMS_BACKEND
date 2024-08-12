@@ -31,4 +31,5 @@ export const errorHandler = (
   res
     .status(500)
     .json(formatResponse(false, "An unexpected error occurred", null));
+
 };

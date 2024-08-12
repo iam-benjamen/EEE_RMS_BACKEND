@@ -2,6 +2,7 @@ import { formatResponse } from "../utils/responseFormatter";
 import { Response, Request, NextFunction } from "express";
 import {
   BadRequestError,
+  InternalServerError,
   NotFoundError,
   UnauthorizedError,
 } from "../utils/error";
