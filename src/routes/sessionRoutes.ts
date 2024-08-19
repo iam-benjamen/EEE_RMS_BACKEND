@@ -8,7 +8,17 @@ import { validate } from "../middleware/validate";
 const sessionRouter: Router = express.Router();
 
 sessionRouter.get("/", authMiddleware, sessionsController.getAllSessions);
-sessionRouter.get("/:id", authMiddleware, sessionsController.getSingleSession);
+sessionRouter.get(
+  "/fetch/:id",
+  authMiddleware,
+  sessionsController.getSingleSession
+);
+sessionRouter.get(
+  "/current",
+  authMiddleware,
+  isRestrictedTo("super_admin"),
+  sessionsController.getCurrentSession
+);
 sessionRouter.post(
   "/",
   authMiddleware,
@@ -16,6 +26,20 @@ sessionRouter.post(
   sessionValidationRules,
   validate,
   sessionsController.createSession
+);
+
+sessionRouter.put(
+  "/set-current/:id",
+  authMiddleware,
+  isRestrictedTo("super_admin"),
+  sessionsController.setActiveSession
+);
+
+sessionRouter.delete(
+  "/:id",
+  authMiddleware,
+  isRestrictedTo("super_admin"),
+  sessionsController.deleteSession
 );
 
 export default sessionRouter;

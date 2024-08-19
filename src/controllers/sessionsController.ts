@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import {
   createSessionQuery,
+  deleteSessionQuery,
   getAllSessionsQuery,
+  getCurrentSessionQuery,
   getSessionByIdQuery,
+  setSesssionAsCurrentQuery,
 } from "../models/sessionsModel";
 import { formatResponse } from "../utils/responseFormatter";
 import { BadRequestError, ConflictError, NotFoundError } from "../utils/error";
@@ -94,5 +97,89 @@ export const createSession = async (
     } else {
       next(error);
     }
+  }
+};
+
+/**
+ * SET CURRENT SESSION
+ */
+export const setActiveSession = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionId = parseInt(req.params.id);
+
+    if (!sessionId) {
+      throw new BadRequestError("Missing session id");
+    }
+
+    const result = await setSesssionAsCurrentQuery(sessionId);
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError("Session not found");
+    }
+
+    res.json(formatResponse(true, "Session set as current", null));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * FETCH CURRENT SESSION
+ */
+export const getCurrentSession = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await getCurrentSessionQuery();
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError("Session not found");
+    }
+
+    res.json(
+      formatResponse(
+        true,
+        "Current Session retrieved successfully",
+        result.rows[0]
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE SESSION
+ * @param req
+ * @param res
+ * @param next
+ */
+export const deleteSession = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionId = parseInt(req.params.id);
+
+    if (!sessionId) {
+      throw new BadRequestError("Mising session id");
+    }
+
+    const result = await deleteSessionQuery(sessionId);
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError("Session not found");
+    }
+
+    res.json(formatResponse(true, "Session deleted successfully", null));
+  } catch (error) {
+    next(error);
   }
 };
